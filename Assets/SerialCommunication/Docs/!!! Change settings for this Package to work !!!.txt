@@ -1,0 +1,4 @@
+For the Arduino to work you have to change these settings:
+
+Menu <Edit><Project Settings>
+<player><other settings><API Compatibility Level*> .NET Framework
