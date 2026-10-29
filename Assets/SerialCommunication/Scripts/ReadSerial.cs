@@ -1,31 +1,39 @@
 using UnityEngine;
-
-
+using System.Globalization;
 
 public class ReadSerial : MonoBehaviour
 {
-    private SerialPortManager spManager;  // Get access to the serialport defined in the SerialPortManager
-    public float mappedValue; // the value after remapping the value received through the serialport 
+    private SerialPortManager spManager;
+
+    [Header("Distance Sensor")]
+    public float distanceCm = -1f;
 
     void Start()
     {
         spManager = SerialPortManager.instance;
 
-        // Subscriben on new data
+        if (spManager == null)
+        {
+            Debug.LogError("SerialPortManager not found!");
+            enabled = false;
+            return;
+        }
+
         spManager.OnRawDataReceived += ProcessRawData;
     }
 
     void ProcessRawData(string raw)
     {
-        if (int.TryParse(raw, out int sensorVal))
+        if (raw == "INVALID")
+            return;
+
+        if (float.TryParse(
+            raw,
+            NumberStyles.Float,
+            CultureInfo.InvariantCulture,
+            out float value) && value > 0f)
         {
-            // example translate 0-1023 to 0–100 
-            mappedValue = Mathf.Lerp(0f, 100f, sensorVal / 1023f);
-            //Debug.Log(sensorVal);
-        }
-        else
-        {
-            Debug.LogWarning("Could not parse raw value: '" + raw + "'");
+            distanceCm = value;
         }
     }
 
@@ -34,5 +42,4 @@ public class ReadSerial : MonoBehaviour
         if (spManager != null)
             spManager.OnRawDataReceived -= ProcessRawData;
     }
-
 }
